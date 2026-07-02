@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Outfit', 'Helvetica', 'Arial', sans-serif;
+    color: #1c2438;
+    font-size: 10pt;
+    background: #ffffff;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    position: relative;
+    page-break-after: always;
+    background: #ffffff;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* ---------- WATERMARK ---------- */
+  .watermark-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140mm;
+    height: 140mm;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .watermark-logo {
+    font-size: 100pt;
+    font-weight: 800;
+    color: {{ accent }};
+    letter-spacing: -2px;
+  }
+
+  /* ---------- COVER PAGE ---------- */
+  .cover-top-stripe {
+    position: absolute;
+    top: 25mm;
+    right: -10mm;
+    width: 70mm;
+    height: 10mm;
+    background: {{ accent }};
+    transform: skewX(-25deg);
+    z-index: 2;
+  }
+  .cover-top-stripe-small {
+    position: absolute;
+    top: 12mm;
+    right: 25mm;
+    width: 35mm;
+    height: 10mm;
+    background: {{ accent }};
+    transform: skewX(-25deg);
+    z-index: 2;
+  }
+  .cover-logo-area {
+    position: absolute;
+    top: 20mm;
+    left: 15mm;
+    z-index: 10;
+  }
+  .logo-symbol {
+    color: {{ accent }};
+    font-size: 32pt;
+    font-weight: 800;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 2mm;
+  }
+  .logo-text-wrap {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.1;
+  }
+  .logo-word-1 {
+    font-size: 18pt;
+    font-weight: 800;
+    color: {{ accent }};
+    letter-spacing: 0.5px;
+  }
+  .logo-word-2 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: {{ accent2 }};
+    letter-spacing: 1px;
+    display: block;
+  }
+
+  .cover-content {
+    position: absolute;
+    top: 75mm;
+    left: 15mm;
+    right: 15mm;
+    z-index: 5;
+    max-width: 105mm;
+  }
+  .cover-title {
+    font-size: 40pt;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #0b0b0d;
+    margin-bottom: 6mm;
+  }
+  .cover-title-accent {
+    color: {{ accent }};
+  }
+  .cover-divider {
+    width: 15mm;
+    height: 2.2mm;
+    background: #000000;
+    margin-bottom: 8mm;
+  }
+  .cover-subtitle {
+    font-size: 14pt;
+    font-weight: 400;
+    color: #4b5266;
+    margin-bottom: 12mm;
+    line-height: 1.4;
+  }
+  .cover-target {
+    font-size: 12pt;
+    font-weight: 400;
+    color: #1a1a1a;
+  }
+  .cover-target strong {
+    font-weight: 800;
+    display: block;
+    margin-top: 1.5mm;
+  }
+
+  .cover-circle-wrap {
+    position: absolute;
+    top: 25%;
+    right: -25mm;
+    width: 120mm;
+    height: 120mm;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 3;
+    border: 3mm solid white;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  }
+  .cover-circle-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cover-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50mm;
+    background: #0b0b0d;
+    clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%);
+    z-index: 2;
+  }
+  .cover-bottom-stripe {
+    position: absolute;
+    bottom: 12mm;
+    left: 10%;
+    width: 60mm;
+    height: 8mm;
+    background: {{ accent }};
+    transform: skewX(-25deg);
+  }
+  .cover-bottom-stripe-2 {
+    position: absolute;
+    bottom: 12mm;
+    left: calc(10% + 65mm);
+    width: 15mm;
+    height: 8mm;
+    background: {{ accent }};
+    transform: skewX(-25deg);
+  }
+
+  /* ---------- INSIDE PAGES ---------- */
+  .inside-header {
+    height: 28mm;
+    position: relative;
+    padding-top: 10mm;
+    z-index: 10;
+  }
+  .inside-header-bar {
+    background: {{ accent }};
+    color: white;
+    font-weight: 800;
+    font-size: 11pt;
+    letter-spacing: 1px;
+    padding: 2.2mm 15mm;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 90%;
+    text-transform: uppercase;
+  }
+  .inside-header-arrow {
+    position: absolute;
+    left: 5mm;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid #0b0b0d;
+  }
+  .inside-header-wires {
+    position: absolute;
+    top: 5mm;
+    right: 0;
+    width: 60mm;
+    height: 20mm;
+    opacity: 0.8;
+    z-index: 1;
+  }
+  .wire-line {
+    position: absolute;
+    background: {{ accent }};
+    transform: rotate(45deg);
+    opacity: 0.6;
+  }
+
+  .inside-content {
+    padding: 4mm 15mm;
+    position: relative;
+    z-index: 5;
+    height: calc(297mm - 28mm - 22mm); /* deduct header + footer */
+    overflow: hidden;
+  }
+
+  .section-title-banner {
+    background: {{ accent2 }};
+    color: #0b0b0d;
+    font-weight: 800;
+    font-size: 11.5pt;
+    padding: 2mm 4mm;
+    margin-top: 6mm;
+    margin-bottom: 4mm;
+    letter-spacing: 0.5px;
+    border-radius: 2px;
+  }
+  .section-text {
+    font-size: 9.8pt;
+    line-height: 1.6;
+    color: #2b2b2b;
+    margin-bottom: 4mm;
+    white-space: pre-wrap;
+  }
+  .section-bullets {
+    margin-bottom: 6mm;
+    list-style-position: inside;
+  }
+  .section-bullet-item {
+    font-size: 9.8pt;
+    line-height: 1.8;
+    color: #2b2b2b;
+    margin-bottom: 1.5mm;
+    padding-left: 1mm;
+    list-style-type: square;
+  }
+  /* Custom marker color styling if supported */
+  .section-bullet-item::marker {
+    color: {{ accent }};
+  }
+
+  /* DELIVERABLES PAGE LAYOUT */
+  .deliv-total-posts {
+    font-size: 14pt;
+    font-weight: 800;
+    color: {{ navy }};
+    margin-bottom: 6mm;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 2mm;
+  }
+  .deliv-groups-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5mm;
+  }
+  .deliv-group-card {
+    background: #fafafa;
+    border-left: 4px solid {{ accent }};
+    padding: 4mm 5mm;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .deliv-group-title {
+    font-size: 11pt;
+    font-weight: 800;
+    color: #0b0b0d;
+    margin-bottom: 2mm;
+  }
+
+  /* PLATFORMS PAGE LAYOUT */
+  .platforms-grid {
+    display: flex;
+    gap: 4mm;
+    margin-bottom: 6mm;
+  }
+  .platform-column {
+    flex: 1;
+    background: #fafafa;
+    border-radius: 4px;
+    padding: 4mm;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-top: 3px solid {{ accent2 }};
+  }
+  .platform-title {
+    font-size: 10pt;
+    font-weight: 800;
+    color: {{ navy }};
+    margin-bottom: 3mm;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #eef;
+    padding-bottom: 1mm;
+  }
+  .platform-list {
+    list-style-type: decimal;
+    list-style-position: inside;
+  }
+  .platform-item {
+    font-size: 9pt;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 1.5mm;
+  }
+
+  .price-payment-wrap {
+    display: flex;
+    gap: 6mm;
+    margin-top: 4mm;
+  }
+  .pricing-block {
+    flex: 1;
+    background: #eef2f7;
+    border-radius: 6px;
+    padding: 5mm 6mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pricing-label {
+    font-weight: 800;
+    color: #4b5266;
+    font-size: 10pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pricing-value {
+    font-size: 14pt;
+    font-weight: 800;
+    color: {{ accent }};
+  }
+  .payment-block {
+    flex: 1.5;
+    background: #fafafa;
+    border-radius: 6px;
+    border: 1px dashed #ccc;
+    padding: 4mm 5mm;
+  }
+  .payment-title {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 2mm;
+    letter-spacing: 0.5px;
+  }
+  .payment-detail-item {
+    font-size: 9pt;
+    line-height: 1.5;
+    color: #333;
+    font-weight: 600;
+  }
+
+  /* PAYMENT TERMS PAGE LAYOUT */
+  .payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4mm;
+    margin-bottom: 6mm;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .payment-table th {
+    background: {{ accent }};
+    color: white;
+    font-weight: 800;
+    text-align: left;
+    padding: 2.5mm 4mm;
+    font-size: 9pt;
+    border: 1px solid #e0e0e0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .payment-table td {
+    padding: 2.5mm 4mm;
+    font-size: 9pt;
+    border: 1px solid #e0e0e0;
+    color: #333;
+  }
+  .payment-table tr:nth-child(even) {
+    background: #fafbfc;
+  }
+
+  .last-page-footer {
+    margin-top: 15mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .contact-info-block {
+    flex: 1.2;
+    font-size: 8.5pt;
+    color: #4b5266;
+    line-height: 1.6;
+  }
+  .contact-line {
+    margin-bottom: 1.5mm;
+    display: flex;
+    align-items: center;
+    gap: 2mm;
+  }
+  .contact-icon {
+    color: {{ accent }};
+    font-weight: bold;
+    font-size: 10pt;
+  }
+  .signatory-block {
+    flex: 1;
+    text-align: right;
+    border-top: 1px solid #000;
+    padding-top: 3mm;
+    margin-top: 12mm;
+  }
+  .signatory-title {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: #0b0b0d;
+  }
+
+  /* ---------- INSIDE FOOTER ---------- */
+  .inside-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20mm;
+    background: white;
+    z-index: 10;
+  }
+  .inside-footer-decor-slant {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60mm;
+    height: 8mm;
+    background: #0b0b0d;
+    clip-path: polygon(0 0, 80% 100%, 0 100%);
+  }
+  .inside-footer-decor-stripe {
+    position: absolute;
+    bottom: 0;
+    left: 20mm;
+    width: 25mm;
+    height: 2.5mm;
+    background: {{ accent }};
+    transform: skewX(-45deg);
+  }
+  .inside-footer-logo {
+    position: absolute;
+    bottom: 4mm;
+    right: 25mm;
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+  }
+  .inside-footer-logo-text {
+    font-size: 8.5pt;
+    font-weight: 800;
+    color: {{ accent }};
+    letter-spacing: 0.3px;
+  }
+  .inside-footer-logo-sub {
+    font-size: 5.5pt;
+    font-weight: 600;
+    color: {{ accent2 }};
+    letter-spacing: 0.5px;
+    display: block;
+    margin-top: -1.5px;
+  }
+
+  .page-number-box {
+    position: absolute;
+    bottom: 3mm;
+    right: 12mm;
+    display: flex;
+    align-items: center;
+    gap: 1.5mm;
+  }
+  .page-number-circle {
+    width: 6mm;
+    height: 6mm;
+    border-radius: 50%;
+    background: #0b0b0d;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8.5pt;
+  }
+  .page-number-stripe {
+    width: 1.5mm;
+    height: 6mm;
+    background: {{ accent }};
+  }
+</style>
+</head>
+<body>
+
+{% for page in pages %}
+<div class="page">
+
+  <!-- Watermark on all pages except cover -->
+  {% if page.type != 'cover' %}
+  <div class="watermark-wrap">
+    <div class="watermark-logo">A</div>
+  </div>
+  {% endif %}
+
+  <!-- COVER PAGE LAYOUT -->
+  {% if page.type == 'cover' %}
+    <div class="cover-top-stripe"></div>
+    <div class="cover-top-stripe-small"></div>
+    
+    <div class="cover-logo-area">
+      {% if client_logo_url %}
+        <img src="{{ client_logo_url }}" style="max-height: 48px; max-width: 180px; object-fit: contain;" />
+      {% else %}
+        <div class="logo-symbol">▲</div>
+        <div class="logo-text-wrap">
+          <span class="logo-word-1">{{ logo_word_1 }}</span>
+          <span class="logo-word-2">{{ logo_word_2 }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="cover-circle-wrap">
+      {% if page.cover_image_url %}
+        <img class="cover-circle-image" src="{{ page.cover_image_url }}" />
+      {% else %}
+        <!-- Default solar panels fall back -->
+        <img class="cover-circle-image" src="https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop" />
+      {% endif %}
+    </div>
+
+    <div class="cover-content">
+      <h1 class="cover-title">
+        {{ page.cover_title_main }}
+        {% if page.cover_title_accent %}
+          <br><span class="cover-title-accent">{{ page.cover_title_accent }}</span>
+        {% endif %}
+      </h1>
+      <div class="cover-divider"></div>
+      <p class="cover-subtitle">{{ page.cover_subtitle }}</p>
+      
+      <p class="cover-target">
+        Presentation for
+        <strong>{{ page.cover_presentation_for }}</strong>
+      </p>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-bottom-stripe"></div>
+      <div class="cover-bottom-stripe-2"></div>
+    </div>
+
+  <!-- INSIDE PAGE LAYOUT -->
+  {% else %}
+    <div class="inside-header">
+      <div class="inside-header-bar">
+        <div class="inside-header-arrow"></div>
+        {{ page.title }}
+      </div>
+      
+      <!-- Inside header wire pattern -->
+      <div class="inside-header-wires">
+        <div class="wire-line" style="width: 20mm; height: 0.5px; top: 0mm; right: 10mm;"></div>
+        <div class="wire-line" style="width: 25mm; height: 0.5px; top: 2mm; right: 15mm;"></div>
+        <div class="wire-line" style="width: 30mm; height: 0.5px; top: 4mm; right: 20mm;"></div>
+        <div class="wire-line" style="width: 15mm; height: 0.5px; top: 6mm; right: 5mm;"></div>
+      </div>
+    </div>
+
+    <div class="inside-content">
+      
+      <!-- RENDER SECTIONS BASED ON PAGE TYPE -->
+      {% if page.type == 'content' %}
+        {% for sec in page.sections %}
+          {% if sec.title %}
+            <div class="section-title-banner">{{ sec.title }}</div>
+          {% endif %}
+          
+          {% if sec.type == 'text' %}
+            <p class="section-text">{{ sec.text }}</p>
+          {% elif sec.type == 'bullets' %}
+            <ul class="section-bullets">
+              {% for bullet in sec.list_items %}
+                {% if bullet %}
+                  <li class="section-bullet-item">{{ bullet }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+
+      {% elif page.type == 'deliverables' %}
+        {% if page.total_posts_text %}
+          <div class="deliv-total-posts">{{ page.total_posts_text }}</div>
+        {% endif %}
+        <div class="deliv-groups-container">
+          {% for group in page.deliverable_groups %}
+            <div class="deliv-group-card">
+              <div class="deliv-group-title">{{ group.title }}</div>
+              <ul class="section-bullets" style="margin-bottom:0;">
+                {% for item in group['items'] %}
+                  {% if item %}
+                    <li class="section-bullet-item">{{ item }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        </div>
+
+      {% elif page.type == 'platforms' %}
+        <div class="platforms-grid">
+          {% for plat in page.platforms %}
+            <div class="platform-column">
+              <div class="platform-title">{{ plat.name }}</div>
+              <ol class="platform-list">
+                {% for item in plat['items'] %}
+                  {% if item %}
+                    <li class="platform-item">{{ item }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ol>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="price-payment-wrap">
+          <div class="pricing-block">
+            <span class="pricing-label">{{ page.price_label or "G. Total" }}</span>
+            <span class="pricing-value">{{ page.price_value }}</span>
+          </div>
+          {% if page.payment_details %}
+            <div class="payment-block">
+              <div class="payment-title">{{ page.payment_label or "For Payment :" }}</div>
+              {% for detail in page.payment_details %}
+                {% if detail %}
+                  <div class="payment-detail-item">{{ detail }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+      {% elif page.type == 'payment_terms' %}
+        {% if page.final_note %}
+          <p class="section-text" style="font-style:italic; margin-bottom:6mm;">{{ page.final_note }}</p>
+        {% endif %}
+
+        <div class="section-title-banner" style="margin-top:0;">Payment Terms</div>
+        <table class="payment-table">
+          <thead>
+            <tr>
+              <th style="width:40%;">Milestone</th>
+              <th style="width:60%;">Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in page.milestones %}
+              <tr>
+                <td style="font-weight:bold; color:{{ navy }};">{{ row.name }}</td>
+                <td>{{ row.payment }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="last-page-footer">
+          <div class="contact-info-block">
+            {% for line in page.contact_details %}
+              {% if line %}
+                <div class="contact-line">
+                  {% if '@' in line %}
+                    <span class="contact-icon">✉</span>
+                  {% elif 'www' in line or '.in' in line or '.com' in line %}
+                    <span class="contact-icon">🌐</span>
+                  {% elif '+' in line or (line[0] in '0123456789' and line|length <= 15) %}
+                    <span class="contact-icon">📞</span>
+                  {% else %}
+                    <span class="contact-icon">📍</span>
+                  {% endif %}
+                  {{ line }}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          
+          {% if page.signatory_text %}
+            <div class="signatory-block">
+              <div class="signatory-title">{{ page.signatory_text }}</div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Inside Page Footer -->
+    <div class="inside-footer">
+      <div class="inside-footer-decor-slant"></div>
+      <div class="inside-footer-decor-stripe"></div>
+      
+      <div class="inside-footer-logo">
+        <span style="font-weight: 800; color: {{ accent }}; font-size: 10pt; vertical-align: middle;">▲</span>
+        <div style="display:inline-block; margin-left: 1.5mm; line-height: 1;">
+          <span class="inside-footer-logo-text">{{ logo_word_1 }}</span>
+          <span class="inside-footer-logo-sub">{{ logo_word_2 }}</span>
+        </div>
+      </div>
+
+      <div class="page-number-box">
+        <div class="page-number-circle">{{ loop.index }}</div>
+        <div class="page-number-stripe"></div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endfor %}
+
+</body>
+</html>
